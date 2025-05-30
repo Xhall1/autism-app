@@ -703,13 +703,34 @@ export default function EmocionesPage() {
       return
     }
 
-    await startCamera()
-    setIsDetecting(true)
+    try {
+      // Primero inicializar la cámara
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          width: 640,
+          height: 480,
+          facingMode: "user",
+        },
+      })
 
-    // Esperar a que el video esté listo
-    setTimeout(() => {
-      detectionIntervalRef.current = setInterval(detectEmotionInPractice, 100)
-    }, 1000)
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        setCameraPermission(true)
+        setDetectionError(null)
+        setIsDetecting(true)
+        
+        // Esperar a que el video esté listo antes de iniciar la detección
+        videoRef.current.onloadedmetadata = () => {
+          setTimeout(() => {
+            detectionIntervalRef.current = setInterval(detectEmotionInPractice, 100)
+          }, 1000)
+        }
+      }
+    } catch (error) {
+      console.error("Error accediendo a la cámara:", error)
+      setCameraPermission(false)
+      setDetectionError("No se pudo acceder a la cámara. Por favor, permite el acceso.")
+    }
   }
 
   // Detener detección
@@ -717,8 +738,17 @@ export default function EmocionesPage() {
     setIsDetecting(false)
     if (detectionIntervalRef.current) {
       clearInterval(detectionIntervalRef.current)
+      detectionIntervalRef.current = null
     }
-    stopCamera()
+    
+    // Detener la cámara
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream
+      stream.getTracks().forEach((track) => track.stop())
+      videoRef.current.srcObject = null
+    }
+    
+    setCameraPermission(null)
     setFaceDetected(false)
     setDetectionConfidence(0)
   }
@@ -1199,7 +1229,7 @@ export default function EmocionesPage() {
                       <span className="text-sm">50 puntos en juego</span>
                       <Badge variant={medallasDesbloqueadas.includes(9) ? "default" : "outline"}>
                         {medallasDesbloqueadas.includes(9) ? "✓" : "○"}
-                      </Badge>
+                      Badge>
                     </div>
                   </div>
                 </div>
