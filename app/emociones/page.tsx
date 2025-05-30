@@ -718,7 +718,7 @@ export default function EmocionesPage() {
         setCameraPermission(true)
         setDetectionError(null)
         setIsDetecting(true)
-        
+
         // Esperar a que el video esté listo antes de iniciar la detección
         videoRef.current.onloadedmetadata = () => {
           setTimeout(() => {
@@ -740,14 +740,14 @@ export default function EmocionesPage() {
       clearInterval(detectionIntervalRef.current)
       detectionIntervalRef.current = null
     }
-    
+
     // Detener la cámara
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream
       stream.getTracks().forEach((track) => track.stop())
       videoRef.current.srcObject = null
     }
-    
+
     setCameraPermission(null)
     setFaceDetected(false)
     setDetectionConfidence(0)
@@ -1229,7 +1229,7 @@ export default function EmocionesPage() {
                       <span className="text-sm">50 puntos en juego</span>
                       <Badge variant={medallasDesbloqueadas.includes(9) ? "default" : "outline"}>
                         {medallasDesbloqueadas.includes(9) ? "✓" : "○"}
-                      Badge>
+                      </Badge>
                     </div>
                   </div>
                 </div>
