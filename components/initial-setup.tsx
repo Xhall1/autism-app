@@ -262,7 +262,7 @@ export function InitialSetup({ onComplete }: InitialSetupProps) {
               {/* Test 1: Protanopia (Dificultad con rojos) */}
               <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <h3 className="font-medium mb-4 text-lg text-gray-800 dark:text-gray-100">
-                  Test 1: ¿Puedes ver el número en este círculo?
+                  Test 1: ¿Puedes ver el número 8 en este círculo?
                 </h3>
                 <div className="flex justify-center mb-4">
                   <div
@@ -331,7 +331,7 @@ export function InitialSetup({ onComplete }: InitialSetupProps) {
               {/* Test 2: Deuteranopia (Dificultad con verdes) */}
               <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <h3 className="font-medium mb-4 text-lg text-gray-800 dark:text-gray-100">
-                  Test 2: ¿Puedes ver el número en este círculo?
+                  Test 2: ¿Puedes ver el número 3 en este círculo?
                 </h3>
                 <div className="flex justify-center mb-4">
                   <div
@@ -393,7 +393,7 @@ export function InitialSetup({ onComplete }: InitialSetupProps) {
               {/* Test 3: Tritanopia (Dificultad con azules) */}
               <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
                 <h3 className="font-medium mb-4 text-lg text-gray-800 dark:text-gray-100">
-                  Test 3: ¿Puedes ver el número en este círculo?
+                  Test 3: ¿Puedes ver el número 5 en este círculo?
                 </h3>
                 <div className="flex justify-center mb-4">
                   <div
