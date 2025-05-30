@@ -46,6 +46,7 @@ interface AppContextType {
   getAdaptedBorder: (border: string) => string
   userName: string
   setUserName: (name: string) => void
+  getEmotionColor: (emotionId: string) => string
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
@@ -281,45 +282,45 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const getAdaptedColor = (originalColor: string) => {
     if (accessibilitySettings.blackWhiteMode) {
       // Convertir a escala de grises
-      if (originalColor.includes("red") || originalColor.includes("green") || originalColor.includes("blue")) {
-        return theme === "dark" ? "text-gray-300" : "text-gray-700"
-      }
       return originalColor.replace(/-(red|green|blue|yellow|purple|orange|pink|teal)-/g, "-gray-")
     }
 
     if (accessibilitySettings.colorBlindMode) {
       const palette = colorBlindPalettes[accessibilitySettings.colorBlindType]
 
-      // Mapear colores específicos
-      const colorMap: { [key: string]: string } = {
-        "from-yellow-400": `from-[${palette.yellow}]`,
-        "to-yellow-600": `to-[${palette.yellow}]`,
-        "from-blue-400": `from-[${palette.blue}]`,
-        "to-blue-600": `to-[${palette.blue}]`,
-        "from-green-400": `from-[${palette.green}]`,
-        "to-green-600": `to-[${palette.green}]`,
-        "from-red-400": `from-[${palette.red}]`,
-        "to-red-600": `to-[${palette.red}]`,
-        "from-purple-400": `from-[${palette.purple}]`,
-        "to-purple-600": `to-[${palette.purple}]`,
-        "from-orange-400": `from-[${palette.orange}]`,
-        "to-orange-600": `to-[${palette.orange}]`,
-        "border-yellow-400": `border-[${palette.yellow}]`,
-        "border-blue-400": `border-[${palette.blue}]`,
-        "border-green-400": `border-[${palette.green}]`,
+      // Mapear colores específicos para clases de Tailwind
+      const colorMappings: { [key: string]: string } = {
+        // Backgrounds
+        "bg-red-300": `bg-[${palette.red}]`,
+        "bg-green-300": `bg-[${palette.green}]`,
+        "bg-blue-300": `bg-[${palette.blue}]`,
+        "bg-yellow-300": `bg-[${palette.yellow}]`,
+        "bg-purple-300": `bg-[${palette.purple}]`,
+        "bg-orange-300": `bg-[${palette.orange}]`,
+        "bg-pink-300": `bg-[${palette.pink}]`,
+        "bg-teal-300": `bg-[${palette.teal}]`,
+        "bg-indigo-300": `bg-[${palette.blue}]`,
+        "bg-gray-300": `bg-[${palette.gray}]`,
+
+        // Text colors
+        "text-red-600": `text-[${palette.red}]`,
+        "text-green-600": `text-[${palette.green}]`,
+        "text-blue-600": `text-[${palette.blue}]`,
+        "text-yellow-600": `text-[${palette.yellow}]`,
+        "text-purple-600": `text-[${palette.purple}]`,
+        "text-orange-600": `text-[${palette.orange}]`,
+
+        // Borders
         "border-red-400": `border-[${palette.red}]`,
+        "border-green-400": `border-[${palette.green}]`,
+        "border-blue-400": `border-[${palette.blue}]`,
+        "border-yellow-400": `border-[${palette.yellow}]`,
         "border-purple-400": `border-[${palette.purple}]`,
         "border-orange-400": `border-[${palette.orange}]`,
-        "bg-gradient-to-r": "bg-gradient-to-r",
-        "shadow-yellow-400/50": `shadow-[${palette.yellow}]/50`,
-        "shadow-blue-400/50": `shadow-[${palette.blue}]/50`,
-        "shadow-green-400/50": `shadow-[${palette.green}]/50`,
-        "shadow-red-400/50": `shadow-[${palette.red}]/50`,
-        "shadow-purple-400/50": `shadow-[${palette.purple}]/50`,
-        "shadow-orange-400/50": `shadow-[${palette.orange}]/50`,
+        "border-teal-400": `border-[${palette.teal}]`,
       }
 
-      return colorMap[originalColor] || originalColor
+      return colorMappings[originalColor] || originalColor
     }
 
     return originalColor
@@ -347,6 +348,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         .replace(/to-purple-\d+/g, `to-[${palette.purple}]`)
         .replace(/from-orange-\d+/g, `from-[${palette.orange}]`)
         .replace(/to-orange-\d+/g, `to-[${palette.orange}]`)
+        .replace(/from-pink-\d+/g, `from-[${palette.pink}]`)
+        .replace(/to-pink-\d+/g, `to-[${palette.pink}]`)
+        .replace(/from-teal-\d+/g, `from-[${palette.teal}]`)
+        .replace(/to-teal-\d+/g, `to-[${palette.teal}]`)
     }
 
     return gradient
@@ -368,6 +373,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         .replace(/border-red-\d+/g, `border-[${palette.red}]`)
         .replace(/border-purple-\d+/g, `border-[${palette.purple}]`)
         .replace(/border-orange-\d+/g, `border-[${palette.orange}]`)
+        .replace(/border-pink-\d+/g, `border-[${palette.pink}]`)
+        .replace(/border-teal-\d+/g, `border-[${palette.teal}]`)
     }
 
     return border
@@ -381,6 +388,39 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   // Obtener volumen base según el tema
   const getBaseVolume = () => {
     return theme === "dark" ? 0.05 : 0.1 // Volumen más bajo en modo oscuro
+  }
+
+  // Función para obtener colores de emociones adaptados
+  const getEmotionColor = (emotionId: string) => {
+    const baseColors = {
+      happy: "#F59E0B", // yellow
+      sad: "#3B82F6", // blue
+      angry: "#EF4444", // red
+      surprised: "#8B5CF6", // purple
+      neutral: "#6B7280", // gray
+      fearful: "#6366F1", // indigo
+    }
+
+    if (accessibilitySettings.blackWhiteMode) {
+      return "#6B7280" // gray for all emotions
+    }
+
+    if (accessibilitySettings.colorBlindMode) {
+      const palette = colorBlindPalettes[accessibilitySettings.colorBlindType]
+
+      const mappings = {
+        happy: palette.yellow,
+        sad: palette.blue,
+        angry: palette.red,
+        surprised: palette.purple,
+        neutral: palette.gray,
+        fearful: palette.blue,
+      }
+
+      return mappings[emotionId] || palette.gray
+    }
+
+    return baseColors[emotionId] || baseColors.neutral
   }
 
   // Detener música actual - MEJORADO
@@ -1153,6 +1193,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         getAdaptedBorder,
         userName,
         setUserName,
+        getEmotionColor,
       }}
     >
       {children}
