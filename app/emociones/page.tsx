@@ -38,7 +38,7 @@ export default function EmocionesPage() {
         console.log("Cargando modelos de Face-api.js desde CDN...")
 
         // Usar CDN para los modelos
-        const MODEL_URL = "https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights"
+        const MODEL_URL = "/models"
 
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
