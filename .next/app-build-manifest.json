@@ -6,15 +6,15 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/page": [
+    "/rutinas/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
+      "static/chunks/app/rutinas/page.js"
     ],
-    "/personalizar/page": [
+    "/recompensas/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/personalizar/page.js"
+      "static/chunks/app/recompensas/page.js"
     ]
   }
 }

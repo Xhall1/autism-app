@@ -35,6 +35,9 @@ export function AppSidebar() {
     toggleTheme,
     getColorClasses,
     getFavoriteAnimalData,
+    accessibilitySettings,
+    favoriteColor,
+    colorBlindPalettes,
   } = useApp()
 
   const [showMusicOptions, setShowMusicOptions] = useState(false)
@@ -43,6 +46,29 @@ export function AppSidebar() {
 
   const colorClasses = getColorClasses()
   const favoriteAnimal = getFavoriteAnimalData()
+
+  // Obtener colores para estilos inline cuando sea necesario
+const getInlineColorStyle = (type: "bg" | "active" | "text") => {
+  if (!accessibilitySettings || !colorBlindPalettes) return {}
+  
+  const { colorBlindMode, blackWhiteMode, colorBlindType } = accessibilitySettings
+  const color = favoriteColor || "purple"
+
+  if (colorBlindMode || blackWhiteMode) {
+    if (blackWhiteMode) {
+      return type === "bg" ? { backgroundColor: theme === "dark" ? "#374151" : "#f3f4f6" } : {}
+    }
+
+    const palette = colorBlindPalettes[colorBlindType] || colorBlindPalettes["normal"]
+    const adaptedColor = palette?.[color] || "#888" // fallback seguro
+
+    if (type === "bg") return { backgroundColor: `${adaptedColor}20` }
+    if (type === "active") return { backgroundColor: `${adaptedColor}30`, color: adaptedColor }
+    if (type === "text") return { color: adaptedColor }
+  }
+
+  return {}
+}
 
   const musicOptions = [
     {
@@ -155,6 +181,7 @@ export function AppSidebar() {
                           ? `text-gray-300 ${colorClasses.hover}`
                           : `text-gray-600 ${colorClasses.hover}`
                     }`}
+                    style={active ? getInlineColorStyle("active") : {}}
                   >
                     <Icon className="mr-3 h-5 w-5" />
                     {item.label}
@@ -188,10 +215,11 @@ export function AppSidebar() {
               </button>
             </div>
 
-            <div className={`p-4 ${colorClasses.bg} rounded-lg`}>
+            <div className={`p-4 ${colorClasses.bg} rounded-lg`} style={getInlineColorStyle("bg")}>
               <button
                 onClick={() => setMusicEnabled(!musicEnabled)}
                 className={`flex items-center justify-between gap-2 text-sm ${colorClasses.text} transition-colors w-full`}
+                style={getInlineColorStyle("text")}
               >
                 <div className="flex items-center gap-2">
                   {musicEnabled ? <Music className="h-4 w-4" /> : <MusicOff className="h-4 w-4" />}

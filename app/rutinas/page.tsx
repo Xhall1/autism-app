@@ -4,6 +4,7 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { useApp } from "@/lib/app-context"
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
+import confetti from "canvas-confetti"
 
 const rutinas = [
   {
@@ -173,6 +174,16 @@ const rutinas = [
   },
 ]
 
+// Mensajes de felicitación entusiastas y variados
+const mensajesFelicitacion = [
+  "¡INCREÍBLE TRABAJO! ¡Eres un CAMPEÓN!",
+  "¡WOW! ¡Lo has hecho GENIAL! ¡SÚPER ESTRELLA!",
+  "¡FANTÁSTICO! ¡Eres ASOMBROSO!",
+  "¡ESPECTACULAR! ¡Qué GRAN TRABAJO!",
+  "¡FABULOSO! ¡Eres un SUPERHÉROE!",
+  "¡EXTRAORDINARIO! ¡Sigue así, CRACK!",
+]
+
 export default function RutinasPage() {
   const {
     theme,
@@ -197,6 +208,20 @@ export default function RutinasPage() {
   const [rutinasState, setRutinasState] = useState(rutinas)
   const audioContextRef = useRef<AudioContext | null>(null)
   const [mostrarCelebracion, setMostrarCelebracion] = useState(false)
+  const [mensajeFelicitacion, setMensajeFelicitacion] = useState("")
+  const [animacionesActivas, setAnimacionesActivas] = useState<{
+    estrellas: boolean
+    confeti: boolean
+    brillos: boolean
+    saltos: boolean
+  }>({
+    estrellas: false,
+    confeti: false,
+    brillos: false,
+    saltos: false,
+  })
+  const celebracionRef = useRef<HTMLDivElement>(null)
+  const medallaRef = useRef<HTMLDivElement>(null)
 
   // Inicializar AudioContext
   useEffect(() => {
@@ -216,7 +241,7 @@ export default function RutinasPage() {
     }
   }, [audioEnabled])
 
-  // Función para reproducir sonidos de rutina (mantengo la función original simplificada)
+  // Función para reproducir sonidos de rutina mejorada
   const reproducirSonidoRutina = (tipoSonido: string) => {
     if (!audioEnabled || !audioContextRef.current) return
 
@@ -225,23 +250,211 @@ export default function RutinasPage() {
       const currentTime = audioContext.currentTime
       const baseVolume = theme === "dark" ? 0.08 : 0.15
 
+      // Sonidos básicos para pasos de rutina
       const oscillator = audioContext.createOscillator()
       const gainNode = audioContext.createGain()
 
       oscillator.connect(gainNode)
       gainNode.connect(audioContext.destination)
 
-      oscillator.frequency.value = 440
-      oscillator.type = "sine"
-
-      gainNode.gain.setValueAtTime(0, currentTime)
-      gainNode.gain.linearRampToValueAtTime(baseVolume, currentTime + 0.1)
-      gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.5)
+      switch (tipoSonido) {
+        case "despertar":
+          oscillator.frequency.value = 523.25 // Do5
+          oscillator.type = "sine"
+          gainNode.gain.setValueAtTime(0, currentTime)
+          gainNode.gain.linearRampToValueAtTime(baseVolume, currentTime + 0.1)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.8)
+          break
+        case "agua":
+          oscillator.frequency.value = 587.33 // Re5
+          oscillator.type = "sine"
+          gainNode.gain.setValueAtTime(0, currentTime)
+          gainNode.gain.linearRampToValueAtTime(baseVolume, currentTime + 0.1)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.8)
+          break
+        case "cepillar":
+          oscillator.frequency.value = 659.25 // Mi5
+          oscillator.type = "triangle"
+          gainNode.gain.setValueAtTime(0, currentTime)
+          gainNode.gain.linearRampToValueAtTime(baseVolume, currentTime + 0.1)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.8)
+          break
+        case "vestir":
+          oscillator.frequency.value = 698.46 // Fa5
+          oscillator.type = "sine"
+          gainNode.gain.setValueAtTime(0, currentTime)
+          gainNode.gain.linearRampToValueAtTime(baseVolume, currentTime + 0.1)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.8)
+          break
+        case "comer":
+          oscillator.frequency.value = 783.99 // Sol5
+          oscillator.type = "sine"
+          gainNode.gain.setValueAtTime(0, currentTime)
+          gainNode.gain.linearRampToValueAtTime(baseVolume, currentTime + 0.1)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.8)
+          break
+        case "exito":
+          // Sonido más elaborado para éxito
+          const frequencies = [523.25, 659.25, 783.99, 1046.5] // Do5, Mi5, Sol5, Do6
+          frequencies.forEach((freq, index) => {
+            const osc = audioContext.createOscillator()
+            const gain = audioContext.createGain()
+            osc.connect(gain)
+            gain.connect(audioContext.destination)
+            osc.frequency.value = freq
+            osc.type = "sine"
+            gain.gain.setValueAtTime(0, currentTime + index * 0.1)
+            gain.gain.linearRampToValueAtTime(baseVolume, currentTime + index * 0.1 + 0.05)
+            gain.gain.exponentialRampToValueAtTime(0.001, currentTime + index * 0.1 + 0.5)
+            osc.start(currentTime + index * 0.1)
+            osc.stop(currentTime + index * 0.1 + 0.5)
+          })
+          return // Retornamos para evitar iniciar el oscilador principal
+        default:
+          oscillator.frequency.value = 440 // La4
+          oscillator.type = "sine"
+          gainNode.gain.setValueAtTime(0, currentTime)
+          gainNode.gain.linearRampToValueAtTime(baseVolume, currentTime + 0.1)
+          gainNode.gain.exponentialRampToValueAtTime(0.001, currentTime + 0.5)
+      }
 
       oscillator.start(currentTime)
-      oscillator.stop(currentTime + 0.5)
+      oscillator.stop(currentTime + 0.8)
     } catch (error) {
       console.log("Error al reproducir sonido de rutina:", error)
+    }
+  }
+
+  // Función para reproducir sonido de celebración
+  const reproducirSonidoCelebracion = () => {
+    if (!audioEnabled || !audioContextRef.current) return
+
+    try {
+      const audioContext = audioContextRef.current
+      const currentTime = audioContext.currentTime
+      const baseVolume = theme === "dark" ? 0.1 : 0.15
+
+      // Secuencia de notas ascendentes para celebración
+      const frequencies = [
+        261.63, // Do4
+        329.63, // Mi4
+        392.0, // Sol4
+        523.25, // Do5
+        659.25, // Mi5
+        783.99, // Sol5
+        1046.5, // Do6
+      ]
+
+      // Tocar notas ascendentes rápidas
+      frequencies.forEach((freq, index) => {
+        const osc = audioContext.createOscillator()
+        const gain = audioContext.createGain()
+
+        osc.connect(gain)
+        gain.connect(audioContext.destination)
+
+        osc.frequency.value = freq
+        osc.type = index % 2 === 0 ? "sine" : "triangle"
+
+        const startTime = currentTime + index * 0.08
+        gain.gain.setValueAtTime(0, startTime)
+        gain.gain.linearRampToValueAtTime(baseVolume, startTime + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2)
+
+        osc.start(startTime)
+        osc.stop(startTime + 0.2)
+      })
+
+      // Añadir un acorde final triunfal
+      const chordFrequencies = [523.25, 659.25, 783.99, 1046.5] // Do5, Mi5, Sol5, Do6
+      const chordStartTime = currentTime + frequencies.length * 0.08 + 0.1
+
+      chordFrequencies.forEach((freq) => {
+        const osc = audioContext.createOscillator()
+        const gain = audioContext.createGain()
+
+        osc.connect(gain)
+        gain.connect(audioContext.destination)
+
+        osc.frequency.value = freq
+        osc.type = "sine"
+
+        gain.gain.setValueAtTime(0, chordStartTime)
+        gain.gain.linearRampToValueAtTime(baseVolume * 0.8, chordStartTime + 0.05)
+        gain.gain.exponentialRampToValueAtTime(0.001, chordStartTime + 1.2)
+
+        osc.start(chordStartTime)
+        osc.stop(chordStartTime + 1.2)
+      })
+    } catch (error) {
+      console.log("Error al reproducir sonido de celebración:", error)
+    }
+  }
+
+  // Función para reproducir sonido de medalla
+  const reproducirSonidoMedalla = () => {
+    if (!audioEnabled || !audioContextRef.current) return
+
+    try {
+      const audioContext = audioContextRef.current
+      const currentTime = audioContext.currentTime
+      const baseVolume = theme === "dark" ? 0.1 : 0.15
+
+      // Sonido de fanfarria para medalla
+      const fanfareNotes = [
+        { freq: 523.25, duration: 0.15 }, // Do5
+        { freq: 523.25, duration: 0.15 }, // Do5
+        { freq: 783.99, duration: 0.3 }, // Sol5
+        { freq: 1046.5, duration: 0.6 }, // Do6
+      ]
+
+      fanfareNotes.forEach((note, index) => {
+        const osc = audioContext.createOscillator()
+        const gain = audioContext.createGain()
+
+        osc.connect(gain)
+        gain.connect(audioContext.destination)
+
+        osc.frequency.value = note.freq
+        osc.type = "triangle"
+
+        const startTime =
+          currentTime + (index > 0 ? fanfareNotes.slice(0, index).reduce((sum, n) => sum + n.duration, 0) : 0)
+
+        gain.gain.setValueAtTime(0, startTime)
+        gain.gain.linearRampToValueAtTime(baseVolume, startTime + 0.02)
+        gain.gain.setValueAtTime(baseVolume, startTime + note.duration - 0.05)
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + note.duration)
+
+        osc.start(startTime)
+        osc.stop(startTime + note.duration)
+      })
+
+      // Añadir brillos sonoros
+      const totalDuration = fanfareNotes.reduce((sum, note) => sum + note.duration, 0)
+      const sparkleStartTime = currentTime + totalDuration
+
+      for (let i = 0; i < 8; i++) {
+        const osc = audioContext.createOscillator()
+        const gain = audioContext.createGain()
+
+        osc.connect(gain)
+        gain.connect(audioContext.destination)
+
+        const sparkleFreq = 2000 + Math.random() * 1000
+        osc.frequency.value = sparkleFreq
+        osc.type = "sine"
+
+        const startTime = sparkleStartTime + i * 0.08
+        gain.gain.setValueAtTime(0, startTime)
+        gain.gain.linearRampToValueAtTime(baseVolume * 0.3, startTime + 0.01)
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.1)
+
+        osc.start(startTime)
+        osc.stop(startTime + 0.1)
+      }
+    } catch (error) {
+      console.log("Error al reproducir sonido de medalla:", error)
     }
   }
 
@@ -293,16 +506,56 @@ export default function RutinasPage() {
             const progreso = Math.round((completados / nuevosPasos.length) * 100)
 
             if (progreso === 100 && rutina.progreso < 100) {
+              // Seleccionar un mensaje aleatorio de felicitación
+              const mensajeAleatorio = mensajesFelicitacion[Math.floor(Math.random() * mensajesFelicitacion.length)]
+              setMensajeFelicitacion(mensajeAleatorio)
+
+              // Iniciar celebración
               setTimeout(() => {
                 setMostrarCelebracion(true)
-                const medalla = {
-                  id: 4,
-                  nombre: "Maestro de rutinas",
-                  imagen: "/images/completasteunarutina.svg",
-                  sonido: "success",
+                reproducirSonidoCelebracion()
+
+                // Lanzar confeti
+                if (typeof window !== "undefined") {
+                  confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                  })
                 }
-                setNuevaMedalla(medalla)
-                desbloquearMedalla(medalla.id)
+
+                // Activar animaciones en secuencia
+                setAnimacionesActivas({
+                  estrellas: true,
+                  confeti: false,
+                  brillos: true,
+                  saltos: false,
+                })
+
+                setTimeout(() => {
+                  setAnimacionesActivas((prev) => ({ ...prev, confeti: true }))
+                }, 300)
+
+                setTimeout(() => {
+                  setAnimacionesActivas((prev) => ({ ...prev, brillos: true }))
+                }, 600)
+
+                setTimeout(() => {
+                  setAnimacionesActivas((prev) => ({ ...prev, saltos: true }))
+                }, 900)
+
+                // Mostrar medalla después de la celebración
+                setTimeout(() => {
+                  const medalla = {
+                    id: 3,
+                    nombre: "¡Completaste una Rutina!",
+                    imagen: "/images/completasteunarutina.svg",
+                    sonido: "success",
+                  }
+                  setNuevaMedalla(medalla)
+                  desbloquearMedalla(medalla.id)
+                  reproducirSonidoMedalla()
+                }, 2000)
               }, 500)
             }
 
@@ -649,62 +902,152 @@ export default function RutinasPage() {
           </div>
         )}
 
-        {/* Celebration Modal (simplified) */}
+        {/* Celebration Modal Mejorado */}
         {mostrarCelebracion && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div
+              ref={celebracionRef}
               className={`${
                 theme === "dark" ? "bg-gray-800" : "bg-white"
-              } rounded-3xl p-12 shadow-2xl max-w-2xl mx-4 text-center`}
+              } rounded-3xl p-12 shadow-2xl max-w-2xl mx-4 text-center relative overflow-hidden`}
             >
-              <div className="text-8xl mb-6">🎉</div>
-              <h2 className={`text-4xl font-bold ${theme === "dark" ? "text-yellow-300" : "text-yellow-600"} mb-4`}>
-                ¡Felicidades!
-              </h2>
-              <p className={`text-2xl ${theme === "dark" ? "text-gray-200" : "text-gray-800"} mb-8`}>
-                Has completado toda la rutina
+              {/* Fondo animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/20 via-purple-500/20 to-blue-500/20 animate-gradient-x"></div>
+
+              {/* Estrellas animadas */}
+              {animacionesActivas.estrellas && (
+                <>
+                  <div className="absolute top-4 left-10 w-8 h-8 text-yellow-400 animate-spin-slow">⭐</div>
+                  <div className="absolute top-10 right-12 w-6 h-6 text-yellow-400 animate-ping">⭐</div>
+                  <div className="absolute bottom-8 left-16 w-6 h-6 text-yellow-400 animate-bounce">⭐</div>
+                  <div className="absolute bottom-16 right-8 w-8 h-8 text-yellow-400 animate-pulse">⭐</div>
+                </>
+              )}
+
+              {/* Confeti animado */}
+              {animacionesActivas.confeti && (
+                <>
+                  <div className="absolute top-0 left-1/4 w-4 h-4 bg-red-500 rounded-full animate-fall-slow"></div>
+                  <div className="absolute top-0 left-1/3 w-3 h-3 bg-blue-500 rounded-full animate-fall-medium"></div>
+                  <div className="absolute top-0 left-1/2 w-2 h-2 bg-green-500 rounded-full animate-fall-fast"></div>
+                  <div className="absolute top-0 left-2/3 w-4 h-4 bg-purple-500 rounded-full animate-fall-medium"></div>
+                  <div className="absolute top-0 left-3/4 w-3 h-3 bg-yellow-500 rounded-full animate-fall-slow"></div>
+                </>
+              )}
+
+              {/* Emoji animado */}
+              <div className={`text-8xl mb-6 ${animacionesActivas.saltos ? "animate-bounce" : ""}`}>🎉</div>
+
+              {/* Título con brillos */}
+              <div className="relative inline-block">
+                {animacionesActivas.brillos && (
+                  <>
+                    <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+                    <div className="absolute top-1/2 -right-4 w-3 h-3 bg-yellow-400 rounded-full animate-ping delay-300"></div>
+                  </>
+                )}
+                <h2
+                  className={`text-4xl font-bold ${theme === "dark" ? "text-yellow-300" : "text-yellow-600"} mb-4 animate-pulse`}
+                >
+                  ¡FELICIDADES!
+                </h2>
+              </div>
+
+              {/* Mensaje entusiasta */}
+              <p className={`text-2xl ${theme === "dark" ? "text-gray-200" : "text-gray-800"} mb-8 font-bold`}>
+                {mensajeFelicitacion}
               </p>
+
+              {/* Mascota celebrando */}
+              <div className="w-32 h-32 mx-auto mb-6 relative">
+                <div
+                  className={`w-full h-full ${favoriteAnimal.color} rounded-full flex items-center justify-center text-5xl ${animacionesActivas.saltos ? "animate-bounce" : ""}`}
+                >
+                  {favoriteAnimal.emoji}
+                </div>
+                {animacionesActivas.brillos && (
+                  <div className="absolute inset-0 rounded-full border-4 border-yellow-400 animate-ping"></div>
+                )}
+              </div>
+
               <button
                 onClick={() => {
                   setMostrarCelebracion(false)
                   volverALista()
                 }}
-                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-3 rounded-xl font-bold text-lg hover:scale-105 transition-transform shadow-lg"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white px-8 py-3 rounded-xl font-bold text-lg hover:scale-105 transition-transform shadow-lg animate-pulse"
               >
-                ¡Genial!
+                ¡GENIAL! 👍
               </button>
             </div>
           </div>
         )}
 
-        {/* New Medal Modal (simplified) */}
+        {/* New Medal Modal Mejorado */}
         {nuevaMedalla && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div
+              ref={medallaRef}
               className={`${
                 theme === "dark" ? "bg-gray-800" : "bg-white"
-              } rounded-3xl p-8 shadow-2xl max-w-lg mx-4 text-center`}
+              } rounded-3xl p-8 shadow-2xl max-w-lg mx-4 text-center relative overflow-hidden z-50`}
             >
-              <h2 className={`text-3xl font-bold ${theme === "dark" ? "text-yellow-300" : "text-yellow-600"} mb-6`}>
-                ¡Nueva Medalla!
-              </h2>
-              <div className="w-32 h-32 mx-auto mb-6">
-                <Image
-                  src={nuevaMedalla.imagen || "/placeholder.svg"}
-                  alt={nuevaMedalla.nombre}
-                  width={128}
-                  height={128}
-                  className="w-full h-full object-contain"
-                />
+              {/* Fondo animado */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-orange-500/10 to-red-500/10 animate-gradient-x"></div>
+
+              {/* Rayos de luz */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-64 h-64 bg-yellow-400/20 rounded-full animate-pulse"></div>
               </div>
-              <h3 className={`text-2xl font-bold ${theme === "dark" ? "text-gray-200" : "text-gray-800"} mb-6`}>
+
+              <h2
+                className={`text-3xl font-bold ${theme === "dark" ? "text-yellow-300" : "text-yellow-600"} mb-6 relative z-10`}
+              >
+                ¡NUEVA MEDALLA DESBLOQUEADA!
+              </h2>
+
+              {/* Medalla con efectos */}
+              <div className="relative w-40 h-40 mx-auto mb-6 z-10">
+                {/* Aura brillante */}
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/50 to-orange-400/50 rounded-full blur-xl animate-pulse"></div>
+
+                {/* Medalla */}
+                <div className="relative w-full h-full animate-float z-10">
+                  <Image
+                    src={nuevaMedalla.imagen || "/placeholder.svg"}
+                    alt={nuevaMedalla.nombre}
+                    width={160}
+                    height={160}
+                    className="w-full h-full object-contain drop-shadow-2xl"
+                  />
+                </div>
+
+                {/* Destellos */}
+                <div className="absolute top-0 left-0 w-4 h-4 bg-white rounded-full animate-ping z-10"></div>
+                <div className="absolute bottom-0 right-0 w-3 h-3 bg-white rounded-full animate-ping delay-300 z-10"></div>
+                <div className="absolute top-1/2 right-0 w-2 h-2 bg-white rounded-full animate-ping delay-700 z-10"></div>
+              </div>
+
+              <h3
+                className={`text-2xl font-bold ${theme === "dark" ? "text-gray-200" : "text-gray-800"} mb-6 relative z-10`}
+              >
                 {nuevaMedalla.nombre}
               </h3>
+
+              <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-gray-600"} mb-8 relative z-10`}>
+                ¡Sigue completando rutinas para desbloquear más medallas increíbles!
+              </p>
+
               <button
-                onClick={() => setNuevaMedalla(null)}
-                className="bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-8 py-3 rounded-xl font-bold text-lg hover:scale-105 transition-transform shadow-lg"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setNuevaMedalla(null)
+                }}
+                className="relative z-20 bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-8 py-3 rounded-xl font-bold text-lg hover:scale-105 transition-transform shadow-lg cursor-pointer"
+                style={{ pointerEvents: "auto" }}
               >
-                ¡Genial!
+                ¡COLECCIONAR! 🏆
               </button>
             </div>
           </div>
@@ -732,6 +1075,63 @@ export default function RutinasPage() {
             transform: translateX(100%);
           }
         }
+        
+        @keyframes gradient-x {
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+        
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+        
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @keyframes fall-slow {
+          0% {
+            transform: translateY(-10px);
+          }
+          100% {
+            transform: translateY(400px) rotate(360deg);
+          }
+        }
+        
+        @keyframes fall-medium {
+          0% {
+            transform: translateY(-10px);
+          }
+          100% {
+            transform: translateY(400px) rotate(720deg);
+          }
+        }
+        
+        @keyframes fall-fast {
+          0% {
+            transform: translateY(-10px);
+          }
+          100% {
+            transform: translateY(400px) rotate(1080deg);
+          }
+        }
 
         .animate-fadeInUp {
           animation: fadeInUp 0.8s ease-out forwards;
@@ -739,6 +1139,31 @@ export default function RutinasPage() {
 
         .animate-shimmer {
           animation: shimmer 2s ease-in-out infinite;
+        }
+        
+        .animate-gradient-x {
+          background-size: 200% 200%;
+          animation: gradient-x 3s ease infinite;
+        }
+        
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 8s linear infinite;
+        }
+        
+        .animate-fall-slow {
+          animation: fall-slow 3s linear forwards;
+        }
+        
+        .animate-fall-medium {
+          animation: fall-medium 2.5s linear forwards;
+        }
+        
+        .animate-fall-fast {
+          animation: fall-fast 2s linear forwards;
         }
 
         .shadow-3xl {
