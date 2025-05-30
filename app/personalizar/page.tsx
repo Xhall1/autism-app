@@ -4,6 +4,50 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { useApp } from "@/lib/app-context"
 import { useState, useEffect, useRef } from "react"
 
+// Paletas de colores científicamente precisas para daltonismo
+const colorBlindPalettes = {
+  normal: {
+    red: "#DC2626",
+    green: "#16A34A",
+    blue: "#2563EB",
+    yellow: "#CA8A04",
+    purple: "#9333EA",
+    orange: "#EA580C",
+    pink: "#EC4899",
+    teal: "#0D9488",
+  },
+  protanopia: {
+    red: "#1D4ED8", // Azul fuerte en lugar de rojo
+    green: "#CA8A04", // Amarillo en lugar de verde
+    blue: "#2563EB", // Azul se mantiene
+    yellow: "#F59E0B", // Amarillo más intenso
+    purple: "#3B82F6", // Azul en lugar de púrpura
+    orange: "#F59E0B", // Amarillo en lugar de naranja
+    pink: "#60A5FA", // Azul claro en lugar de rosa
+    teal: "#06B6D4", // Cian se mantiene bien
+  },
+  deuteranopia: {
+    red: "#DC2626", // Rojo se mantiene
+    green: "#F97316", // Naranja en lugar de verde
+    blue: "#2563EB", // Azul se mantiene
+    yellow: "#F59E0B", // Amarillo se mantiene
+    purple: "#7C3AED", // Púrpura se mantiene
+    orange: "#EA580C", // Naranja se mantiene
+    pink: "#F472B6", // Rosa se mantiene
+    teal: "#0EA5E9", // Azul cian en lugar de teal
+  },
+  tritanopia: {
+    red: "#DC2626", // Rojo se mantiene
+    green: "#16A34A", // Verde se mantiene
+    blue: "#059669", // Verde en lugar de azul
+    yellow: "#DC2626", // Rojo en lugar de amarillo
+    purple: "#BE185D", // Rosa fuerte en lugar de púrpura
+    orange: "#EA580C", // Naranja se mantiene
+    pink: "#EC4899", // Rosa se mantiene
+    teal: "#16A34A", // Verde en lugar de teal
+  },
+}
+
 const amigos = [
   { id: 1, emoji: "🦁", nombre: "León", color: "bg-yellow-600", sonido: "roar" },
   { id: 2, emoji: "🦊", nombre: "Zorro", color: "bg-orange-400", sonido: "fox" },
@@ -111,6 +155,42 @@ export default function PersonalizarPage() {
     colorBlindType: accessibilitySettings.colorBlindType,
     blackWhiteMode: accessibilitySettings.blackWhiteMode,
   })
+
+  // Función para obtener colores adaptados usando estilos inline
+  const getAdaptedColorStyle = (colorName: string) => {
+    if (localAccessibilitySettings.blackWhiteMode) {
+      return { backgroundColor: "#6B7280" } // gray
+    }
+
+    if (localAccessibilitySettings.colorBlindMode) {
+      const palette = colorBlindPalettes[localAccessibilitySettings.colorBlindType]
+      const colorMap = {
+        purple: palette.purple,
+        blue: palette.blue,
+        teal: palette.teal,
+        green: palette.green,
+        pink: palette.pink,
+        yellow: palette.yellow,
+        orange: palette.orange,
+        red: palette.red,
+      }
+      return { backgroundColor: colorMap[colorName] || palette.purple }
+    }
+
+    // Colores normales
+    const normalColors = {
+      purple: "#9333EA",
+      blue: "#2563EB",
+      teal: "#0D9488",
+      green: "#16A34A",
+      pink: "#EC4899",
+      yellow: "#CA8A04",
+      orange: "#EA580C",
+      red: "#DC2626",
+    }
+
+    return { backgroundColor: normalColors[colorName] || normalColors.purple }
+  }
 
   // Inicializar AudioContext
   useEffect(() => {
@@ -491,11 +571,12 @@ export default function PersonalizarPage() {
                   className={`relative group transition-all duration-300 hover:scale-110`}
                 >
                   <div
-                    className={`w-20 h-20 rounded-2xl ${getAdaptedGradient(color.color)} ${
+                    className={`w-20 h-20 rounded-2xl ${
                       selectedColor === color.id
                         ? `ring-4 ${getAdaptedBorder("ring-purple-400")} shadow-lg transform scale-105`
                         : "hover:shadow-md"
                     } transition-all duration-300`}
+                    style={getAdaptedColorStyle(color.value)}
                   />
                   <p
                     className={`text-sm font-medium mt-2 ${
